@@ -1,0 +1,11 @@
+{
+  "appId": "com.knowledgecard.app",
+  "appName": "知识卡片",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

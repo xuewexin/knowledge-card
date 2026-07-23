@@ -1,0 +1,22 @@
+{
+  "name": "knowledge-card",
+  "version": "1.0.0",
+  "description": "知识卡片 - 扇贝风格背诵备忘录",
+  "main": "www/index.html",
+  "scripts": {
+    "start": "npx serve www -p 8765",
+    "cap:init": "npx cap init '知识卡片' 'com.knowledgecard.app' --web-dir www",
+    "cap:add": "npx cap add android",
+    "cap:sync": "npx cap sync",
+    "cap:open": "npx cap open android",
+    "cap:build": "npx cap sync && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.2.1",
+    "@capacitor/cli": "^7.2.1",
+    "@capacitor/core": "^7.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}

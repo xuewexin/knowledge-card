@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="theme-color" content="#4CAF84" />
+<title>知识卡片 · 每天进步一点点</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  App 容器                                           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="app-container" id="app">
+
+  <!-- ═══════ 主页 ═══════════════════════════════════════ -->
+  <div class="page active" id="page-home">
+    <div class="status-bar"></div>
+
+    <div class="page-header">
+      <div class="greeting" id="greeting">早上好 ☀️</div>
+      <div class="title">知识卡片</div>
+      <!-- 今日打卡状态 -->
+      <div class="checkin-badge" id="checkin-badge">
+        <span class="checkin-dot"></span>
+        <span id="checkin-text">今天还没打卡哦</span>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- 今日统计 -->
+      <div class="today-stats" id="today-stats">
+        <span>📊 今日已复习 <strong id="today-count">0</strong> 张</span>
+        <span>🔥 连续 <strong id="today-streak">0</strong> 天</span>
+      </div>
+
+      <!-- 学科横滑选择器 -->
+      <div class="subject-section">
+        <div class="subject-carousel" id="subject-carousel">
+          <!-- JS 渲染 -->
+        </div>
+      </div>
+
+      <!-- 统计卡片 -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-number" id="stat-due">0</span>
+          <span class="stat-label">待复习</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="stat-mastered">0</span>
+          <span class="stat-label">已掌握</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="stat-total">0</span>
+          <span class="stat-label">总卡片</span>
+        </div>
+      </div>
+
+      <!-- 进度环 -->
+      <div class="progress-section">
+        <div class="progress-ring">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="40" />
+            <circle class="ring-fill" id="ring-fill" cx="50" cy="50" r="40"
+                    stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+          </svg>
+          <div class="ring-center">
+            <span class="num" id="ring-percent">0%</span>
+            <span class="lbl" id="ring-label">掌握率</span>
+          </div>
+        </div>
+        <div class="progress-info">
+          <h3>学习进度</h3>
+          <p id="progress-info-text">还没有卡片，去添加你的第一张知识卡片吧</p>
+        </div>
+      </div>
+
+      <!-- 开始学习按钮 -->
+      <button class="btn-start-learn" id="btn-start-learn" disabled>
+        <span>📖</span> 暂无待复习卡片
+      </button>
+
+      <!-- 卡片列表 -->
+      <div class="section-title">
+        <span id="card-list-title">全部卡片</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge" id="badge-total">共 0 张</span>
+          <span class="badge badge-link" id="btn-manage-cards">查看全部 →</span>
+        </div>
+      </div>
+      <div class="card-list" id="recent-cards-list"></div>
+    </div>
+
+    <!-- 底部导航 -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-page="home">
+        <span class="nav-icon">📚</span>
+        <span class="nav-label">学习</span>
+      </button>
+      <button class="nav-item nav-add" data-page="add">
+        <div class="nav-icon-wrapper">
+          <span class="nav-icon" style="font-size:22px">＋</span>
+        </div>
+        <span class="nav-label">添加</span>
+      </button>
+      <button class="nav-item" data-page="user">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">我的</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ═══════ 添加页面 ═══════════════════════════════════ -->
+  <div class="page" id="page-add">
+    <div class="status-bar"></div>
+
+    <div class="page-header">
+      <div class="greeting">创建新的</div>
+      <div class="title">添加卡片</div>
+    </div>
+
+    <div class="page-content">
+      <!-- 卡片类型切换 -->
+      <div class="type-toggle" id="type-toggle">
+        <button class="type-btn active" data-type="qa">📝 问答卡片</button>
+        <button class="type-btn" data-type="choice">✅ 选择题</button>
+      </div>
+
+      <!-- 学科选择 -->
+      <div class="form-group">
+        <label>📂 学科</label>
+        <select class="subject-select" id="input-subject">
+          <option value="">未分类</option>
+          <!-- JS 渲染 -->
+        </select>
+      </div>
+
+      <!-- 问题 -->
+      <div class="form-group">
+        <label>📝 问题</label>
+        <textarea id="input-question" placeholder="输入你要记忆的问题…&#10;例如：什么是闭包？" rows="2"></textarea>
+      </div>
+
+      <!-- 答案（问答模式） -->
+      <div class="form-group" id="qa-answer-group">
+        <label>💡 答案</label>
+        <textarea id="input-answer" placeholder="输入答案或解释…&#10;例如：闭包是指函数能够访问其外部作用域中变量的特性，即使外部函数已经执行完毕。" rows="3"></textarea>
+      </div>
+
+      <!-- 选择题选项区 -->
+      <div class="choice-options-section" id="choice-options-section" style="display:none">
+        <div class="form-group">
+          <label>🎯 正确答案</label>
+          <textarea id="input-correct-option" placeholder="输入正确选项的内容…" rows="1"></textarea>
+        </div>
+        <div class="form-group">
+          <label>❌ 错误选项（至少2个）</label>
+          <div id="wrong-options-container">
+            <input class="wrong-option-input" placeholder="错误选项 1" />
+            <input class="wrong-option-input" placeholder="错误选项 2" />
+            <input class="wrong-option-input" placeholder="错误选项 3" />
+          </div>
+        </div>
+        <button class="btn-ai-generate" id="btn-ai-generate" type="button">
+          <span class="ai-btn-icon">🤖</span>
+          <span class="ai-btn-text">AI 生成干扰项</span>
+        </button>
+        <div class="ai-status" id="ai-status" style="display:none"></div>
+      </div>
+
+      <!-- 标签 -->
+      <div class="form-group">
+        <label>🏷️ 标签（按回车添加，最多5个）</label>
+        <div class="tag-input-wrapper" id="tag-chips">
+          <input class="tag-input" id="tag-input" placeholder="输入标签…" style="border:none;height:32px;font-size:13px;outline:none;flex:0 0 auto;min-width:80px" />
+        </div>
+      </div>
+
+      <button class="btn-submit" id="btn-submit-card">保存卡片</button>
+
+      <!-- 提示 -->
+      <div style="margin-top:20px;font-size:11px;color:var(--text-hint);text-align:center">
+        添加后返回「学习」即可开始背诵
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item" data-page="home">
+        <span class="nav-icon">📚</span>
+        <span class="nav-label">学习</span>
+      </button>
+      <button class="nav-item nav-add active" data-page="add">
+        <div class="nav-icon-wrapper">
+          <span class="nav-icon" style="font-size:22px">＋</span>
+        </div>
+        <span class="nav-label">添加</span>
+      </button>
+      <button class="nav-item" data-page="user">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">我的</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ═══════ 用户页面 ═══════════════════════════════════ -->
+  <div class="page" id="page-user">
+    <div class="status-bar"></div>
+
+    <div class="page-header">
+      <div class="greeting">个人中心</div>
+      <div class="title">我的</div>
+    </div>
+
+    <div class="page-content">
+      <!-- 头像区域 -->
+      <div class="user-avatar-section">
+        <div class="user-avatar">📖</div>
+        <div class="user-name">知识探索者</div>
+        <div class="user-streak" id="user-streak">🔥 连续打卡 0 天</div>
+      </div>
+
+      <!-- 数据统计 -->
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="val" id="user-stat-total">0</div>
+          <div class="lbl">总卡片数</div>
+        </div>
+        <div class="stat-item">
+          <div class="val" id="user-stat-mastered">0</div>
+          <div class="lbl">已掌握</div>
+        </div>
+        <div class="stat-item">
+          <div class="val" id="user-stat-due">0</div>
+          <div class="lbl">待复习</div>
+        </div>
+        <div class="stat-item">
+          <div class="val" id="user-stat-reviews">0</div>
+          <div class="lbl">总复习次数</div>
+        </div>
+      </div>
+
+      <!-- 打卡日期 -->
+      <div style="text-align:center;margin-bottom:16px;font-size:13px;color:var(--text-secondary)">
+        上次打卡：<span id="checkin-date" style="font-weight:600;color:var(--text-primary)">尚未打卡</span>
+      </div>
+
+      <!-- 学习日历 -->
+      <div class="section-title">
+        学习日历
+        <span class="badge" id="badge-calendar-days">过去 70 天</span>
+      </div>
+      <div class="calendar-container" id="calendar-container">
+        <div class="calendar-weekdays">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+        </div>
+        <div class="calendar-grid" id="calendar-grid">
+          <!-- JS 渲染 -->
+        </div>
+        <div class="calendar-legend">
+          <span>少</span>
+          <span class="legend-cell" style="background:#EBEDF0"></span>
+          <span class="legend-cell" style="background:#C6E48B"></span>
+          <span class="legend-cell" style="background:#7BC96F"></span>
+          <span class="legend-cell" style="background:#239A3B"></span>
+          <span class="legend-cell" style="background:#196127"></span>
+          <span>多</span>
+        </div>
+      </div>
+
+      <!-- 设置列表 -->
+      <div class="settings-list">
+        <div class="settings-item" id="btn-ai-config">
+          <span class="si-icon">🤖</span>
+          <div class="si-text">
+            <div class="si-title">AI 出题配置</div>
+            <div class="si-sub">配置 API 密钥用于生成选择题</div>
+          </div>
+          <span class="si-arrow">›</span>
+        </div>
+
+        <div class="settings-item" id="btn-batch-import">
+          <span class="si-icon">📄</span>
+          <div class="si-text">
+            <div class="si-title">批量导入</div>
+            <div class="si-sub">从 Markdown 文件批量导入卡片</div>
+          </div>
+          <span class="si-arrow">›</span>
+        </div>
+
+        <div class="settings-item" id="btn-export">
+          <span class="si-icon">📤</span>
+          <div class="si-text">
+            <div class="si-title">导出备份</div>
+            <div class="si-sub">保存所有卡片数据为 JSON 文件</div>
+          </div>
+          <span class="si-arrow">›</span>
+        </div>
+
+        <div class="settings-item" id="btn-import-trigger">
+          <span class="si-icon">📥</span>
+          <div class="si-text">
+            <div class="si-title">导入备份</div>
+            <div class="si-sub">从 JSON 文件恢复卡片数据</div>
+          </div>
+          <span class="si-arrow">›</span>
+          <input type="file" id="file-import" accept=".json" style="display:none" />
+        </div>
+
+        <div class="settings-item danger" id="btn-reset">
+          <span class="si-icon">🗑️</span>
+          <div class="si-text">
+            <div class="si-title">清空数据</div>
+            <div class="si-sub">删除所有卡片和学习记录</div>
+          </div>
+          <span class="si-arrow">›</span>
+        </div>
+      </div>
+
+      <!-- 版本 -->
+      <div style="text-align:center;margin-top:24px;font-size:11px;color:var(--text-hint)">
+        知识卡片 v2.0 · 每天进步一点点
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item" data-page="home">
+        <span class="nav-icon">📚</span>
+        <span class="nav-label">学习</span>
+      </button>
+      <button class="nav-item nav-add" data-page="add">
+        <div class="nav-icon-wrapper">
+          <span class="nav-icon" style="font-size:22px">＋</span>
+        </div>
+        <span class="nav-label">添加</span>
+      </button>
+      <button class="nav-item active" data-page="user">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">我的</span>
+      </button>
+    </nav>
+  </div>
+
+</div><!-- /app-container -->
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  学习模式全屏覆盖层                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="learn-overlay" id="learn-overlay">
+  <div class="learn-header">
+    <button class="learn-close" id="learn-close">✕</button>
+    <span class="learn-progress-text" id="learn-progress-text">0 / 0</span>
+    <div style="width:32px"></div>
+  </div>
+
+  <div class="learn-progress-bar">
+    <div class="fill" id="learn-progress-fill" style="width:0%"></div>
+  </div>
+
+  <div class="learn-body">
+    <!-- 翻转卡片（问答模式） -->
+    <div class="card-flip-container" id="card-flip-container">
+      <div class="card-flip-inner" id="card-flip-inner">
+        <div class="card-face card-front">
+          <span class="card-tag" id="learn-tag">通用</span>
+          <div class="card-question" id="learn-question">问题内容</div>
+          <div class="card-hint">👆 点击翻转查看答案</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-answer-label">📖 答案</div>
+          <div class="card-answer" id="learn-answer">答案内容</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 选择题显示区 -->
+    <div class="choice-display" id="choice-display" style="display:none">
+      <span class="card-tag" id="choice-tag">通用</span>
+      <div class="choice-question" id="choice-question">问题内容</div>
+      <div class="choice-options-grid" id="choice-options-grid">
+        <!-- JS 渲染 -->
+      </div>
+    </div>
+
+    <!-- 学习完成 -->
+    <div class="learn-complete" id="learn-complete">
+      <div class="complete-icon" id="complete-emoji">🎉</div>
+      <h2 id="complete-title">全部掌握！</h2>
+      <p id="complete-text">本次复习完成</p>
+      <button class="btn-start-learn" id="btn-continue-learn" style="width:auto;padding:14px 48px">
+        复习没记住的卡片
+      </button>
+      <button class="btn-start-learn" id="btn-close-learn" style="width:auto;padding:14px 48px;margin-top:12px;background:#F5F5F5;color:var(--text-secondary);box-shadow:none">
+        返回首页
+      </button>
+    </div>
+  </div>
+
+  <!-- 底部操作按钮（问答模式） -->
+  <div class="learn-actions" id="learn-actions" style="display:none">
+    <button class="btn-feedback btn-again" id="btn-again">🤔 再想想</button>
+    <button class="btn-feedback btn-got-it" id="btn-got-it">✅ 知道了</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  AI 配置 Modal                                      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-ai-config">
+  <div class="modal-sheet">
+    <h3>🤖 AI 出题配置</h3>
+    <p style="font-size:12px;color:var(--text-hint);margin-bottom:16px">
+      密钥仅保存在本地，不会上传到任何服务器
+    </p>
+
+    <div class="form-group">
+      <label>AI 提供商</label>
+      <select id="ai-provider" class="subject-select">
+        <option value="openai">OpenAI</option>
+        <option value="claude">Claude (Anthropic)</option>
+        <option value="deepseek">DeepSeek</option>
+        <option value="custom">自定义</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>API Key</label>
+      <input type="password" id="ai-apikey" placeholder="输入你的 API 密钥…" />
+      <div style="font-size:11px;color:var(--text-hint);margin-top:4px" id="ai-key-hint"></div>
+    </div>
+
+    <div class="form-group">
+      <label>模型（可选）</label>
+      <input type="text" id="ai-model" placeholder="留空使用默认模型…" />
+    </div>
+
+    <div class="form-group" id="ai-baseurl-group" style="display:none">
+      <label>API 端点（Base URL）</label>
+      <input type="text" id="ai-baseurl" placeholder="https://api.openai.com/v1" />
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <button class="btn-submit" id="btn-test-connection" style="flex:1;background:var(--text-secondary)">
+        🔌 测试连接
+      </button>
+      <button class="btn-submit" id="btn-save-ai-config" style="flex:1">
+        💾 保存配置
+      </button>
+    </div>
+    <button class="btn-submit" id="btn-delete-ai-config" style="width:100%;margin-top:8px;background:#F5F5F5;color:#E53935;box-shadow:none">
+      🗑️ 删除配置
+    </button>
+    <div class="test-result" id="test-result" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  确认弹窗                                          -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal-sheet" style="text-align:center">
+    <h3 id="confirm-title">确认操作</h3>
+    <p id="confirm-message" style="margin:12px 0 24px;color:var(--text-secondary);font-size:14px"></p>
+    <div style="display:flex;gap:12px">
+      <button class="btn-submit" id="btn-confirm-cancel" style="flex:1;background:#F5F5F5;color:var(--text-secondary);box-shadow:none">取消</button>
+      <button class="btn-submit" id="btn-confirm-ok" style="flex:1">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  卡片管理覆盖层                                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="manage-overlay" id="manage-overlay">
+  <div class="manage-header">
+    <button class="manage-back" id="manage-back">← 返回</button>
+    <span class="manage-title">管理卡片</span>
+    <div style="width:48px"></div>
+  </div>
+
+  <div class="manage-search">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="manage-search-input" placeholder="搜索卡片…" />
+    <select class="manage-filter" id="manage-filter-subject">
+      <option value="__all__">全部分科</option>
+      <!-- JS 渲染 -->
+    </select>
+  </div>
+
+  <div class="manage-list" id="manage-card-list">
+    <!-- JS 渲染 -->
+  </div>
+
+  <!-- 空状态 -->
+  <div class="empty-state" id="manage-empty" style="display:none">
+    <span class="empty-icon">📝</span>
+    <p>没有匹配的卡片</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  编辑卡片 Modal                                     -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-edit-card">
+  <div class="modal-sheet">
+    <h3>✏️ 编辑卡片</h3>
+    <input type="hidden" id="edit-card-id" />
+
+    <div class="form-group">
+      <label>📂 学科</label>
+      <select class="subject-select" id="edit-subject">
+        <option value="">未分类</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>📝 问题</label>
+      <textarea id="edit-question" rows="2"></textarea>
+    </div>
+
+    <div class="form-group" id="edit-answer-group">
+      <label>💡 答案</label>
+      <textarea id="edit-answer" rows="3"></textarea>
+    </div>
+
+    <!-- 编辑选择题选项 -->
+    <div id="edit-choice-section" style="display:none">
+      <div class="form-group">
+        <label>🎯 正确答案</label>
+        <textarea id="edit-correct-option" rows="1"></textarea>
+      </div>
+      <div class="form-group">
+        <label>❌ 错误选项</label>
+        <div id="edit-wrong-options">
+          <input class="wrong-option-input" data-idx="0" placeholder="错误选项 1" />
+          <input class="wrong-option-input" data-idx="1" placeholder="错误选项 2" />
+          <input class="wrong-option-input" data-idx="2" placeholder="错误选项 3" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>🏷️ 标签</label>
+      <input type="text" id="edit-tags" placeholder="用逗号分隔标签…" />
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <button class="btn-submit" id="btn-cancel-edit" style="flex:1;background:#F5F5F5;color:var(--text-secondary);box-shadow:none">取消</button>
+      <button class="btn-submit" id="btn-save-edit" style="flex:1">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  Onboarding 引导页                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="onboard-overlay" id="onboard-overlay">
+  <div class="onboard-slides" id="onboard-slides">
+    <div class="onboard-slide">
+      <div class="onboard-illustration">📝</div>
+      <h2>创建知识卡片</h2>
+      <p>添加问题和答案，按学科分类，支持问答和选择两种模式</p>
+    </div>
+    <div class="onboard-slide">
+      <div class="onboard-illustration">🧠</div>
+      <h2>每天背诵复习</h2>
+      <p>翻转卡片回忆答案，系统自动根据掌握程度安排下次复习</p>
+    </div>
+    <div class="onboard-slide">
+      <div class="onboard-illustration">📊</div>
+      <h2>追踪学习进度</h2>
+      <p>打卡日历记录坚持，进度环展示掌握率，让进步看得见</p>
+    </div>
+  </div>
+  <div class="onboard-dots" id="onboard-dots">
+    <div class="onboard-dot active"></div>
+    <div class="onboard-dot"></div>
+    <div class="onboard-dot"></div>
+  </div>
+  <div class="onboard-footer">
+    <button class="onboard-skip" id="onboard-skip">跳过</button>
+    <button class="onboard-next" id="onboard-next">下一步</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  批量导入 Modal                                     -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-batch-import">
+  <div class="modal-sheet">
+    <h3>📄 批量导入卡片</h3>
+    <p style="font-size:12px;color:var(--text-hint);margin-bottom:12px">
+      支持 Markdown 格式，粘贴内容或上传 .md 文件
+    </p>
+
+    <button class="btn-template-download" id="btn-download-template">📥 下载导入模板</button>
+
+    <div class="form-group">
+      <textarea id="import-md-textarea" placeholder="## 数学
+Q: 什么是勾股定理？
+A: a²+b²=c²
+
+Q: [选择] 1+1=?
+A: 2
+- 3
+- 4
+- 5
+
+## 英语
+Q: apple 的中文意思？
+A: 苹果"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>或选择 .md 文件</label>
+      <input type="file" id="import-md-file" accept=".md,.txt" />
+    </div>
+
+    <div class="import-result" id="import-result" style="display:none"></div>
+
+    <div style="display:flex;gap:12px;margin-top:16px">
+      <button class="btn-submit" id="btn-cancel-import" style="flex:1;background:var(--surface-secondary);color:var(--text-secondary);box-shadow:none">取消</button>
+      <button class="btn-submit" id="btn-do-import" style="flex:1">📥 导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 撒花容器 -->
+<div class="confetti-container" id="confetti-container"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  Scripts (order matters for dependencies)           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<script type="module" src="assets/store.js"></script>
+<script type="module" src="assets/reviewlog.js"></script>
+<script type="module" src="assets/subjects.js"></script>
+<script type="module" src="assets/ai.js"></script>
+<script type="module" src="assets/app.js"></script>
+
+<!-- 根据时间更新问候语 -->
+<script>
+(function() {
+  const hour = new Date().getHours();
+  const greeting = hour < 6 ? '夜深了 🌙' : hour < 9 ? '早上好 ☀️' : hour < 12 ? '上午好 🌤️' : hour < 14 ? '中午好 ☀️' : hour < 18 ? '下午好 🌈' : hour < 22 ? '晚上好 🌙' : '夜深了 🌙';
+  document.getElementById('greeting').textContent = greeting;
+})();
+</script>
+
+</body>
+</html>
